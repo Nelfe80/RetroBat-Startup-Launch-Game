@@ -4,43 +4,72 @@ import subprocess
 import psutil
 import xml.etree.ElementTree as ET
 import requests
+import configparser
+import shutil
 
-# === Base du dossier du script de base ===
-base_dir = os.path.dirname(os.path.abspath(__file__))
+# === Définition du répertoire de base ===
+# On suppose que le répertoire de travail courant est celui où se trouvent boot.exe et boot.ini
+base_dir = os.getcwd()
 
-# === 1. Lecture du fichier boot.ini ===
+# === Suppression des dossiers dans .tmp sauf le plus récent ===
+tmp_dir = os.path.join(base_dir, ".tmp")
+if os.path.exists(tmp_dir):
+    # Liste uniquement les dossiers présents dans .tmp
+    directories = [os.path.join(tmp_dir, d) for d in os.listdir(tmp_dir)
+                   if os.path.isdir(os.path.join(tmp_dir, d))]
+    if directories:
+        # Sélectionne le dossier le plus récent (basé sur le temps de modification)
+        latest_dir = max(directories, key=os.path.getmtime)
+        for d in directories:
+            if d != latest_dir:
+                print(f"Suppression du dossier : {d}")
+                shutil.rmtree(d)
+else:
+    print(f"Le dossier .tmp n'existe pas à {tmp_dir}")
+
+# === 1. Lecture du fichier boot.ini avec configparser ===
 boot_ini_path = os.path.join(base_dir, "boot.ini")
-bootrom = None
-bootcommand = None
 
 if not os.path.exists(boot_ini_path):
     print("Erreur : boot.ini introuvable.")
     exit(1)
 
-with open(boot_ini_path, "r", encoding="utf-8") as f:
-    for line in f:
-        if "=" in line:
-            key, value = map(str.strip, line.split("=", 1))
-            if key.lower() == "bootrom":
-                bootrom = os.path.join(base_dir, value) if not os.path.isabs(value) else value
-            elif key.lower() == "bootcommand":
-                bootcommand = os.path.join(base_dir, value) if not os.path.isabs(value) else value
+boot = configparser.ConfigParser()
+boot.read(boot_ini_path, encoding="utf-8")
 
-if not bootrom or not bootcommand:
-    print("Erreur : bootrom ou bootcommand non défini dans boot.ini.")
+try:
+    # Lecture des options dans la section [Default]
+    bootrom = boot.get("Default", "bootrom")
+    bootcommand = boot.get("Default", "bootcommand")
+except configparser.Error as e:
+    print("Erreur lors de la lecture de boot.ini :", e)
     exit(1)
 
+# Convertir les chemins relatifs en chemins absolus si nécessaire
+if not os.path.isabs(bootrom):
+    bootrom = os.path.join(base_dir, bootrom)
+if not os.path.isabs(bootcommand):
+    bootcommand = os.path.join(base_dir, bootcommand)
+
 # === 2. Modification de es_settings.cfg ===
-user_home = os.path.expanduser("~")
-es_cfg_dir = os.path.join(user_home, ".emulationstation")
+# Le script est dans C:/RetroBatV7/plugins/StartupLaunchGame/
+# et es_settings.cfg se trouve dans C:/RetroBatV7/emulationstation/.emulationstation/
+es_cfg_dir = os.path.normpath(os.path.join(base_dir, "../../emulationstation/.emulationstation"))
 es_cfg_path = os.path.join(es_cfg_dir, "es_settings.cfg")
 
+# Vérifie que le dossier de configuration existe, sinon le crée
 if not os.path.exists(es_cfg_dir):
     os.makedirs(es_cfg_dir)
 
-if os.path.exists(es_cfg_path):
-    tree = ET.parse(es_cfg_path)
-    root = tree.getroot()
+# Tente de charger le fichier XML, sinon en créer un nouveau document
+if os.path.exists(es_cfg_path) and os.path.getsize(es_cfg_path) > 0:
+    try:
+        tree = ET.parse(es_cfg_path)
+        root = tree.getroot()
+    except ET.ParseError:
+        print("Fichier es_settings.cfg invalide, création d'un nouveau fichier.")
+        root = ET.Element("config")
+        tree = ET.ElementTree(root)
 else:
     root = ET.Element("config")
     tree = ET.ElementTree(root)
