@@ -1,6 +1,6 @@
 ## 📦 Installation
 
-1. Copy the following files in the /dist into the folder:
+1. Copy the following files of the dist folder into the folder:
 
 ```
 /RetroBat/plugins/StartupLaunchGame/
@@ -23,7 +23,7 @@ bootcommand = ..\..\RetroBat.exe
 ```
 
 - `bootrom`: path to the ROM file you want to auto-launch (relative or absolute).
-- `bootcommand`: path to RetroBat or any launcher script (e.g., a `.bat` file).
+- `bootcommand`: path to RetroBat or any launcher script (e.g., a `.bat` file like ../MarqueeManager/Start.bat).
 
 Paths are resolved relative to the `StartupLaunchGame` folder.
 
@@ -44,7 +44,7 @@ This will run `boot.exe` at each Windows login.
 
 ## 💡 Notes
 
-- No fixed delay: the tool waits for the ES to become available.
+- No fixed delay: the tool waits for the ES http service to become available. ( auto adapted to the video intro delay )
 - Supports both relative and absolute paths.
 - Integrates seamlessly with RetroBat on Windows.
 
