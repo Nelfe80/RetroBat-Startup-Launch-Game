@@ -54,7 +54,3 @@ This will run `boot.exe` at each Windows login.
 
 This project is open-source and free to use. Feel free to contribute or suggest improvements!
 ```
-
----
-
-Tu peux maintenant coller tout ça dans un fichier `README.md` dans ton dépôt GitHub, et il sera affiché automatiquement sur la page d’accueil du projet.
