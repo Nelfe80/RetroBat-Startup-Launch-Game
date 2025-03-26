@@ -5,7 +5,7 @@ import psutil
 import xml.etree.ElementTree as ET
 import requests
 
-# === Base du dossier du script ===
+# === Base du dossier du script de base ===
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
 # === 1. Lecture du fichier boot.ini ===
