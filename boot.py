@@ -87,7 +87,10 @@ tree.write(es_cfg_path)
 
 # === 3. Lancement de bootcommand ===
 print(f"Lancement de : {bootcommand}")
-subprocess.Popen(bootcommand, shell=True)
+# Pour que le batch trouve ses fichiers, on définit le répertoire de travail à celui du batch.
+# On récupère le dossier du batch en le séparant de son nom de fichier.
+start_bat_dir = bootcommand.rsplit(os.sep, 1)[0]
+subprocess.Popen(bootcommand, shell=True, cwd=start_bat_dir)
 
 # === 4. Attente de emulationstation.exe ===
 print("Recherche de emulationstation.exe...")
