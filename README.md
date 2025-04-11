@@ -1,3 +1,6 @@
+
+<img src="https://github.com/Nelfe80/RetroBat-Startup-Launch-Game/blob/main/dist/_img/logo.png"/>
+
 ## 📦 Installation
 
 1. Copy the following files of the dist folder into the folder:
